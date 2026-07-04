@@ -2,10 +2,17 @@ package com.app.cliente.model.entity;
 
 import com.app.usuario.model.entity.Usuario;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "cliente")
 public class Cliente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -29,20 +36,10 @@ public class Cliente {
     private Boolean ativo = true;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "endereco_id",
-            nullable = false
-    )
+    @JoinColumn(name = "endereco_id", nullable = false)
     private Endereco endereco;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "usuario_id",
-            nullable = false
-    )
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
-
-    public Cliente() {
-    }
-
 }

@@ -1,7 +1,13 @@
 package com.app.cliente.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "endereco")
 public class Endereco {
@@ -27,7 +33,4 @@ public class Endereco {
 
     @Column(nullable = false, length = 8)
     private String cep;
-
-    public Endereco() {
-    }
 }

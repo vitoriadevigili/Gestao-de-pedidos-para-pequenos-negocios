@@ -3,6 +3,9 @@ package com.app.cliente.controller;
 import com.app.cliente.model.dto.AtualizarClienteRequest;
 import com.app.cliente.model.dto.ClienteResponse;
 import com.app.cliente.model.dto.CriarClienteRequest;
+import com.app.cliente.model.dto.EnderecoResponse;
+import com.app.cliente.model.entity.Cliente;
+import com.app.cliente.model.entity.Endereco;
 import com.app.cliente.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,34 +26,53 @@ public class ClienteController {
 
     @GetMapping
     public ResponseEntity<List<ClienteResponse>> listarTodos() {
-        List<ClienteResponse> clientes = clienteService.listarTodos();
-        return ResponseEntity.ok(clientes);
+        List<Cliente> clienteList = clienteService.listarTodos();
+        List<ClienteResponse> clienteResponseList = clienteList.stream().map(this::toResponse).toList();
+        return ResponseEntity.ok(clienteResponseList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable Long id) {
-        ClienteResponse cliente = clienteService.buscarPorId(id);
-        return ResponseEntity.ok(cliente);
+    public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable Integer id) {
+        Cliente cliente = clienteService.buscarPorId(id);
+        return ResponseEntity.ok(toResponse(cliente));
     }
 
     @PostMapping
     public ResponseEntity<ClienteResponse> criar(@RequestBody @Valid CriarClienteRequest cliente) {
-        ClienteResponse salvo = clienteService.salvar(cliente);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+        Cliente clienteNovo = clienteService.salvar(cliente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(clienteNovo));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponse> atualizar(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody @Valid AtualizarClienteRequest cliente
     ) {
-        ClienteResponse atualizado = clienteService.atualizar(id, cliente);
-        return ResponseEntity.ok(atualizado);
+        Cliente atualizado = clienteService.atualizar(id, cliente);
+        return ResponseEntity.ok(toResponse(atualizado));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         clienteService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private ClienteResponse toResponse(Cliente cliente) {
+        Endereco e = cliente.getEndereco();
+        EnderecoResponse enderecoResponse = new EnderecoResponse(
+                e.getId(), e.getRua(), e.getNumero(), e.getBairro(),
+                e.getCidade(), e.getEstado(), e.getCep()
+        );
+        return new ClienteResponse(
+                cliente.getId(),
+                cliente.getNome(),
+                cliente.getCnpj(),
+                cliente.getTelefone(),
+                cliente.getEmail(),
+                cliente.getExigeNotaFiscal(),
+                cliente.getAtivo(),
+                enderecoResponse
+        );
     }
 }

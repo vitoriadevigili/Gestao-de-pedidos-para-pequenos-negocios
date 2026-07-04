@@ -1,43 +1,104 @@
 package com.app.cliente.service;
 
 import com.app.cliente.model.dto.AtualizarClienteRequest;
-import com.app.cliente.model.dto.ClienteResponse;
 import com.app.cliente.model.dto.CriarClienteRequest;
+import com.app.cliente.model.entity.Cliente;
+import com.app.cliente.model.entity.Endereco;
 import com.app.cliente.repository.ClienteRepository;
-import jakarta.validation.Valid;
+import com.app.cliente.repository.EnderecoRepository;
+import com.app.usuario.model.entity.Usuario;
+import com.app.usuario.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final EnderecoRepository enderecoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public ClienteService(ClienteRepository clienteRepository) {
+    public ClienteService(
+            ClienteRepository clienteRepository,
+            EnderecoRepository enderecoRepository,
+            UsuarioRepository usuarioRepository
+    ) {
         this.clienteRepository = clienteRepository;
+        this.enderecoRepository = enderecoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
-    public List<ClienteResponse> listarTodos() {
-        return new ArrayList<>();
+    public List<Cliente> listarTodos() {
+        return clienteRepository.findAllByAtivoTrue();
     }
 
-    public ClienteResponse buscarPorId(Long id) {
-        return new ClienteResponse(
-                null, null, null, null, null, null, null, null);
+    public Cliente buscarPorId(Integer id) {
+        return encontrarCliente(id);
     }
 
-    public ClienteResponse salvar(@Valid CriarClienteRequest cliente) {
-        return new ClienteResponse(
-                null, null, null, null, null, null, null, null);
+    @Transactional
+    public Cliente salvar(CriarClienteRequest request) {
+        Usuario usuario = usuarioRepository.findById(request.usuarioId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        Endereco endereco = new Endereco();
+        endereco.setRua(request.endereco().rua());
+        endereco.setNumero(request.endereco().numero());
+        endereco.setBairro(request.endereco().bairro());
+        endereco.setCidade(request.endereco().cidade());
+        endereco.setEstado(request.endereco().estado());
+        endereco.setCep(request.endereco().cep());
+        enderecoRepository.save(endereco);
+
+        Cliente cliente = new Cliente();
+        cliente.setNome(request.nome());
+        cliente.setCnpj(request.cnpj());
+        cliente.setTelefone(request.telefone());
+        cliente.setEmail(request.email());
+        cliente.setExigeNotaFiscal(request.exigeNotaFiscal() != null ? request.exigeNotaFiscal() : false);
+        cliente.setEndereco(endereco);
+        cliente.setUsuario(usuario);
+
+        return clienteRepository.save(cliente);
     }
 
-    public ClienteResponse atualizar(Long id, @Valid AtualizarClienteRequest cliente) {
-        return new ClienteResponse(
-                null, null, null, null, null, null, null, null);
+    @Transactional
+    public Cliente atualizar(Integer id, AtualizarClienteRequest request) {
+        Cliente cliente = encontrarCliente(id);
+
+        if (request.nome() != null) cliente.setNome(request.nome());
+        if (request.telefone() != null) cliente.setTelefone(request.telefone());
+        if (request.email() != null) cliente.setEmail(request.email());
+        if (request.exigeNotaFiscal() != null) cliente.setExigeNotaFiscal(request.exigeNotaFiscal());
+        if (request.ativo() != null) cliente.setAtivo(request.ativo());
+
+        if (request.endereco() != null) {
+            Endereco endereco = cliente.getEndereco();
+            if (request.endereco().rua() != null) endereco.setRua(request.endereco().rua());
+            if (request.endereco().numero() != null) endereco.setNumero(request.endereco().numero());
+            if (request.endereco().bairro() != null) endereco.setBairro(request.endereco().bairro());
+            if (request.endereco().cidade() != null) endereco.setCidade(request.endereco().cidade());
+            if (request.endereco().estado() != null) endereco.setEstado(request.endereco().estado());
+            if (request.endereco().cep() != null) endereco.setCep(request.endereco().cep());
+        }
+
+        return clienteRepository.save(cliente);
     }
 
-    public void deletar(Long id) {
+    @Transactional
+    public void deletar(Integer id) {
+        Cliente cliente = encontrarCliente(id);
+        cliente.setAtivo(false);
+        clienteRepository.save(cliente);
     }
+
+    private Cliente encontrarCliente(Integer id) {
+        return clienteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
+    }
+
 }
