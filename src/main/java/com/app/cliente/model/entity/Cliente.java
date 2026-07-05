@@ -35,6 +35,9 @@ public class Cliente {
     @Column
     private Boolean ativo = true;
 
+    @Column
+    private Boolean deletado = false;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id", nullable = false)
     private Endereco endereco;

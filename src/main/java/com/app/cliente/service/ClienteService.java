@@ -1,5 +1,6 @@
 package com.app.cliente.service;
 
+import com.app.auth.security.UsuarioAutenticadoProvider;
 import com.app.cliente.model.dto.AtualizarClienteRequest;
 import com.app.cliente.model.dto.CriarClienteRequest;
 import com.app.cliente.model.entity.Cliente;
@@ -7,7 +8,6 @@ import com.app.cliente.model.entity.Endereco;
 import com.app.cliente.repository.ClienteRepository;
 import com.app.cliente.repository.EnderecoRepository;
 import com.app.usuario.model.entity.Usuario;
-import com.app.usuario.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,20 +20,21 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final EnderecoRepository enderecoRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioAutenticadoProvider usuarioAutenticadoProvider;
 
     public ClienteService(
             ClienteRepository clienteRepository,
             EnderecoRepository enderecoRepository,
-            UsuarioRepository usuarioRepository
+            UsuarioAutenticadoProvider usuarioAutenticadoProvider
     ) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.usuarioAutenticadoProvider = usuarioAutenticadoProvider;
     }
 
     public List<Cliente> listarTodos() {
-        return clienteRepository.findAllByAtivoTrue();
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return clienteRepository.findAllByUsuarioIdAndAtivoTrue(usuario.getId());
     }
 
     public Cliente buscarPorId(Integer id) {
@@ -42,8 +43,7 @@ public class ClienteService {
 
     @Transactional
     public Cliente salvar(CriarClienteRequest request) {
-        Usuario usuario = usuarioRepository.findById(request.usuarioId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
 
         Endereco endereco = new Endereco();
         endereco.setRua(request.endereco().rua());
@@ -97,7 +97,8 @@ public class ClienteService {
     }
 
     private Cliente encontrarCliente(Integer id) {
-        return clienteRepository.findById(id)
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return clienteRepository.findByUsuarioIdAndIdAndDeletadoIsFalse(usuario.getId(), id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 

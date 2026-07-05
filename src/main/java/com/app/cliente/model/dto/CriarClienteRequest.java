@@ -24,9 +24,6 @@ public record CriarClienteRequest(
 
         @Valid
         @NotNull(message = "Endereço é obrigatório")
-        CriarEnderecoRequest endereco,
-
-        @NotNull(message = "Usuário é obrigatório")
-        Integer usuarioId
+        CriarEnderecoRequest endereco
 ) {
 }
