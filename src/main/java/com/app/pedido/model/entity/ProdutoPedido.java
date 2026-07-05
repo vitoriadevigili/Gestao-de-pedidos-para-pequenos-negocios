@@ -1,12 +1,16 @@
 package com.app.pedido.model.entity;
 
-import com.app.cliente.model.entity.Cliente;
 import com.app.produto.model.entity.Produto;
-import com.app.usuario.model.entity.Usuario;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.math.BigDecimal;
+
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "produto_pedido")
 public class ProdutoPedido {
@@ -18,28 +22,14 @@ public class ProdutoPedido {
     @Column(nullable = false)
     private Integer quantidade;
 
-    @Column(
-            name = "valor_unitario",
-            nullable = false,
-            precision = 10,
-            scale = 2
-    )
+    @Column(name = "valor_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorUnitario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "pedido_id",
-            nullable = false
-    )
+    @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "produto_id",
-            nullable = false
-    )
+    @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
-
-    public ProdutoPedido() {
-    }
 }

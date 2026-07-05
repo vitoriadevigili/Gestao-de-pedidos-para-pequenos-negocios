@@ -45,4 +45,9 @@ public class Cliente {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
+
+    public boolean estaInativo(){
+        return !this.ativo;
+    }
+
 }

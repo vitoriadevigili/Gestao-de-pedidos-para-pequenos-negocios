@@ -1,0 +1,132 @@
+package com.app.pedido.service;
+
+import com.app.auth.security.UsuarioAutenticadoProvider;
+import com.app.cliente.model.entity.Cliente;
+import com.app.cliente.repository.ClienteRepository;
+import com.app.pedido.model.dto.AtualizarPedidoRequest;
+import com.app.pedido.model.dto.CriarPedidoRequest;
+import com.app.pedido.model.dto.ItemPedidoRequest;
+import com.app.pedido.model.entity.Pedido;
+import com.app.pedido.model.entity.ProdutoPedido;
+import com.app.pedido.repository.PedidoRepository;
+import com.app.pedido.repository.ProdutoPedidoRepository;
+import com.app.produto.model.entity.Produto;
+import com.app.produto.repository.ProdutoRepository;
+import com.app.usuario.model.entity.Usuario;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class PedidoService {
+
+    private final PedidoRepository pedidoRepository;
+    private final ProdutoPedidoRepository produtoPedidoRepository;
+    private final ClienteRepository clienteRepository;
+    private final ProdutoRepository produtoRepository;
+    private final UsuarioAutenticadoProvider usuarioAutenticadoProvider;
+
+    public PedidoService(
+            PedidoRepository pedidoRepository,
+            ProdutoPedidoRepository produtoPedidoRepository,
+            ClienteRepository clienteRepository,
+            ProdutoRepository produtoRepository,
+            UsuarioAutenticadoProvider usuarioAutenticadoProvider
+    ) {
+        this.pedidoRepository = pedidoRepository;
+        this.produtoPedidoRepository = produtoPedidoRepository;
+        this.clienteRepository = clienteRepository;
+        this.produtoRepository = produtoRepository;
+        this.usuarioAutenticadoProvider = usuarioAutenticadoProvider;
+    }
+
+    public List<Pedido> listarTodos() {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return pedidoRepository.findAllByUsuarioIdAndAtivoTrue(usuario.getId());
+    }
+
+    public Pedido buscarPorId(Integer id) {
+        return encontrarPedido(id);
+    }
+
+    @Transactional
+    public Pedido salvar(CriarPedidoRequest request) {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+
+        Cliente cliente = clienteRepository.findByUsuarioIdAndIdAndDeletadoIsFalse(usuario.getId(), request.clienteId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
+
+        if (cliente.estaInativo())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente está inativo");
+
+        Pedido pedido = new Pedido();
+        pedido.setData(request.data());
+        pedido.setCliente(cliente);
+        pedido.setUsuario(usuario);
+        pedidoRepository.save(pedido);
+
+        BigDecimal valorTotal = criarItens(pedido, request.itens(), usuario);
+        pedido.setValorTotal(valorTotal);
+
+        return pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public Pedido atualizar(Integer id, AtualizarPedidoRequest request) {
+        Pedido pedido = encontrarPedido(id);
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+
+        if (request.itens() != null && !request.itens().isEmpty()) {
+            produtoPedidoRepository.deleteAllByPedidoId(pedido.getId());
+            BigDecimal valorTotal = criarItens(pedido, request.itens(), usuario);
+            pedido.setValorTotal(valorTotal);
+        }
+
+        if (request.ativo() != null) pedido.setAtivo(request.ativo());
+
+        return pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public void deletar(Integer id) {
+        Pedido pedido = encontrarPedido(id);
+        pedido.setAtivo(false);
+        pedidoRepository.save(pedido);
+    }
+
+    public List<ProdutoPedido> listarItens(Integer pedidoId) {
+        return produtoPedidoRepository.findAllByPedidoId(pedidoId);
+    }
+
+    private BigDecimal criarItens(Pedido pedido, List<ItemPedidoRequest> itens, Usuario usuario) {
+        BigDecimal valorTotal = BigDecimal.ZERO;
+
+        for (ItemPedidoRequest item : itens) {
+            Produto produto = produtoRepository.findByUsuarioIdAndId(usuario.getId(), item.produtoId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
+
+            ProdutoPedido produtoPedido = new ProdutoPedido();
+            produtoPedido.setPedido(pedido);
+            produtoPedido.setProduto(produto);
+            produtoPedido.setQuantidade(item.quantidade());
+            produtoPedido.setValorUnitario(item.valorUnitario());
+            produtoPedidoRepository.save(produtoPedido);
+
+            valorTotal = valorTotal.add(item.valorUnitario().multiply(BigDecimal.valueOf(item.quantidade())));
+        }
+
+        return valorTotal;
+    }
+
+    private Pedido encontrarPedido(Integer id) {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return pedidoRepository.findByUsuarioIdAndId(usuario.getId(), id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado"));
+    }
+
+}
