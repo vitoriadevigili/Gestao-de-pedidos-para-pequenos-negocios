@@ -2,11 +2,12 @@ package com.app.pedido.repository;
 
 import com.app.pedido.model.entity.Pedido;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
+public interface PedidoRepository extends JpaRepository<Pedido, Integer>, JpaSpecificationExecutor<Pedido> {
 
     List<Pedido> findAllByUsuarioIdAndAtivoTrue(Integer usuarioId);
 
