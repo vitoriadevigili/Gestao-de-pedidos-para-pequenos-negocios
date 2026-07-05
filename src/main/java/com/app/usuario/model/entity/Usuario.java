@@ -1,7 +1,13 @@
 package com.app.usuario.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "usuario")
 public class Usuario {
@@ -18,9 +24,4 @@ public class Usuario {
 
     @Column(nullable = false, length = 255)
     private String senha;
-
-    public Usuario() {
-    }
-
-
 }
