@@ -32,4 +32,8 @@ public class ProdutoPedido {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
+
+    public BigDecimal calcularValorTotal(){
+        return valorUnitario.multiply(BigDecimal.valueOf(quantidade));
+    }
 }
