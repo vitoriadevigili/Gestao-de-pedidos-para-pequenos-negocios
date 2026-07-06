@@ -19,8 +19,8 @@ public record AtualizarEnderecoRequest(
         String estado,
 
         @Pattern(
-                regexp = "^\\d{8}$",
-                message = "CEP deve conter exatamente 8 números"
+                regexp = "^\\d{5}-\\d{3}$",
+                message = "CEP deve estar no formato 00000-000"
         )
         String cep
 

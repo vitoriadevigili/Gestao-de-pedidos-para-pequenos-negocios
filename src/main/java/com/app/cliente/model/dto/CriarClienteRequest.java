@@ -11,12 +11,12 @@ public record CriarClienteRequest(
         @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
         String nome,
 
-        @Size(max = 14, message = "CNPJ deve ter no máximo 14 caracteres")
-        @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve conter 14 números")
+        @Size(max = 18, message = "CNPJ deve ter no máximo 18 caracteres")
+        @Pattern(regexp = "^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$", message = "CNPJ deve estar no formato 00.000.000/0000-00")
         @CNPJ(message = "CNPJ inválido")
         String cnpj,
 
-        @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve conter entre 10 e 11 números")
+        @Pattern(regexp = "^\\(\\d{2}\\) \\d{4,5}-\\d{4}$", message = "Telefone deve estar no formato (00) 0000-0000 ou (00) 00000-0000")
         String telefone,
 
         @Email(message = "Email inválido")

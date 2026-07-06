@@ -72,7 +72,7 @@ public class ClienteService {
         Cliente cliente = encontrarCliente(id);
 
         if (request.nome() != null) cliente.setNome(request.nome());
-        if (request.telefone() != null) cliente.setTelefone(request.telefone());
+        if (request.telefone() != null) cliente.setTelefone(FormatadorUtils.removerFormatacaoTelefone(request.telefone()));
         if (request.email() != null) cliente.setEmail(request.email());
         if (request.exigeNotaFiscal() != null) cliente.setExigeNotaFiscal(request.exigeNotaFiscal());
         if (request.ativo() != null) cliente.setAtivo(request.ativo());
@@ -84,7 +84,7 @@ public class ClienteService {
             if (request.endereco().bairro() != null) endereco.setBairro(request.endereco().bairro());
             if (request.endereco().cidade() != null) endereco.setCidade(request.endereco().cidade());
             if (request.endereco().estado() != null) endereco.setEstado(request.endereco().estado());
-            if (request.endereco().cep() != null) endereco.setCep(request.endereco().cep());
+            if (request.endereco().cep() != null) endereco.setCep(FormatadorUtils.removerFormatacaoCep(request.endereco().cep()));
         }
 
         return clienteRepository.save(cliente);
