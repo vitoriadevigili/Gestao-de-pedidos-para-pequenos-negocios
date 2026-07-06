@@ -104,6 +104,11 @@ public class PedidoService {
     }
 
     private BigDecimal criarItens(Pedido pedido, List<ItemPedidoRequest> itens, Usuario usuario) {
+        if (existeItemDuplicado(itens)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Não é permitido incluir o mesmo produto mais de uma vez no pedido");
+        }
+
         BigDecimal valorTotal = BigDecimal.ZERO;
 
         for (ItemPedidoRequest item : itens) {
@@ -121,6 +126,15 @@ public class PedidoService {
         }
 
         return valorTotal;
+    }
+
+    private boolean existeItemDuplicado(List<ItemPedidoRequest> itens) {
+        long produtosDistintos = itens.stream().map(ItemPedidoRequest::produtoId).distinct().count();
+
+        if (produtosDistintos < itens.size()) {
+            return true;
+        }
+        return false;
     }
 
     private Pedido encontrarPedido(Integer id) {
