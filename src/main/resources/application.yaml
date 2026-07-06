@@ -19,3 +19,8 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
