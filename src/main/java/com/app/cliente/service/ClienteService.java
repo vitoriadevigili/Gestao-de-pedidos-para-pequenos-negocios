@@ -8,6 +8,7 @@ import com.app.cliente.model.entity.Endereco;
 import com.app.cliente.repository.ClienteRepository;
 import com.app.cliente.repository.EnderecoRepository;
 import com.app.usuario.model.entity.Usuario;
+import com.app.util.FormatadorUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class ClienteService {
 
     public List<Cliente> listarTodos() {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
-        return clienteRepository.findAllByUsuarioIdAndAtivoTrue(usuario.getId());
+        return clienteRepository.findAllByUsuarioId(usuario.getId());
     }
 
     public Cliente buscarPorId(Integer id) {
@@ -51,13 +52,13 @@ public class ClienteService {
         endereco.setBairro(request.endereco().bairro());
         endereco.setCidade(request.endereco().cidade());
         endereco.setEstado(request.endereco().estado());
-        endereco.setCep(request.endereco().cep());
+        endereco.setCep(FormatadorUtils.removerFormatacaoCep(request.endereco().cep()));
         enderecoRepository.save(endereco);
 
         Cliente cliente = new Cliente();
         cliente.setNome(request.nome());
-        cliente.setCnpj(request.cnpj());
-        cliente.setTelefone(request.telefone());
+        cliente.setCnpj(FormatadorUtils.removerFormatacaoCnpj(request.cnpj()));
+        cliente.setTelefone(FormatadorUtils.removerFormatacaoTelefone(request.telefone()));
         cliente.setEmail(request.email());
         cliente.setExigeNotaFiscal(request.exigeNotaFiscal() != null ? request.exigeNotaFiscal() : false);
         cliente.setEndereco(endereco);

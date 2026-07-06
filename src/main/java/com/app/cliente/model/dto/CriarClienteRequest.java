@@ -2,6 +2,8 @@ package com.app.cliente.model.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.br.CNPJ;
+
 
 public record CriarClienteRequest(
 
@@ -11,6 +13,7 @@ public record CriarClienteRequest(
 
         @Size(max = 14, message = "CNPJ deve ter no máximo 14 caracteres")
         @Pattern(regexp = "^\\d{14}$", message = "CNPJ deve conter 14 números")
+        @CNPJ(message = "CNPJ inválido")
         String cnpj,
 
         @Pattern(regexp = "^\\d{10,11}$", message = "Telefone deve conter entre 10 e 11 números")
@@ -20,6 +23,7 @@ public record CriarClienteRequest(
         @Size(max = 150)
         String email,
 
+        @NotNull
         Boolean exigeNotaFiscal,
 
         @Valid
