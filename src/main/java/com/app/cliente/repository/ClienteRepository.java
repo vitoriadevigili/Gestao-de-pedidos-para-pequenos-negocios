@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 
-    List<Cliente> findAllByUsuarioIdAndAtivoTrue(Integer usuarioId);
+    List<Cliente> findAllByUsuarioId(Integer usuarioId);
 
     Optional<Cliente> findByUsuarioIdAndIdAndDeletadoIsFalse(Integer usuarioId, Integer id);
 }
