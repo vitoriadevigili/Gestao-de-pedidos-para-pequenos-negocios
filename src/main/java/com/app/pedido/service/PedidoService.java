@@ -82,14 +82,31 @@ public class PedidoService {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
 
         if (request.itens() != null && !request.itens().isEmpty()) {
-            produtoPedidoRepository.deleteAllByPedidoId(pedido.getId());
-            BigDecimal valorTotal = criarItens(pedido, request.itens(), usuario);
+            for (ItemPedidoRequest item : request.itens()) {
+                ProdutoPedido produtoPedido = produtoPedidoRepository.findByPedidoIdAndProdutoId(pedido.getId(), item.produtoId())
+                        .orElse(new ProdutoPedido());
+
+                Produto produto = produtoRepository.findByUsuarioIdAndId(usuario.getId(), item.produtoId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
+
+                produtoPedido.setPedido(pedido);
+                produtoPedido.setProduto(produto);
+                produtoPedido.setQuantidade(item.quantidade());
+                produtoPedido.setValorUnitario(item.valorUnitario());
+                produtoPedidoRepository.save(produtoPedido);
+            }
+            List<ProdutoPedido> produtoPedidoList = produtoPedidoRepository.findAllByPedidoId(pedido.getId());
+            BigDecimal valorTotal = calcularValorTotalPedido(produtoPedidoList);
             pedido.setValorTotal(valorTotal);
         }
-
         if (request.ativo() != null) pedido.setAtivo(request.ativo());
-
         return pedidoRepository.save(pedido);
+    }
+
+    private BigDecimal calcularValorTotalPedido(List<ProdutoPedido> produtoPedidoList) {
+        return produtoPedidoList.stream()
+                .map(ProdutoPedido::calcularValorTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Transactional
