@@ -59,8 +59,8 @@ public class PedidoController {
     }
 
     private PedidoResponse toResponse(Pedido pedido) {
-        List<ProdutoPedido> produtoPedido = pedidoService.listarItens(pedido.getId());
-        List<ItemPedidoResponse> itemResponseList = produtoPedido.stream()
+        List<ProdutoPedido> produtoPedidoList = pedidoService.listarItens(pedido.getId());
+        List<ItemPedidoResponse> itemResponseList = produtoPedidoList.stream()
                 .map(item -> new ItemPedidoResponse(
                         item.getProduto().getId(),
                         item.getProduto().getNome(),
