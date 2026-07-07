@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Integer> {
 
-    List<Produto> findAllByUsuarioIdAndAtivoTrue(Integer usuarioId);
+    List<Produto> findAllByUsuarioId(Integer usuarioId);
 
     Optional<Produto> findByUsuarioIdAndId(Integer usuarioId, Integer id);
 }

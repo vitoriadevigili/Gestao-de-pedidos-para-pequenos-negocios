@@ -33,7 +33,7 @@ public class ProdutoService {
 
     public List<Produto> listarTodos() {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
-        return produtoRepository.findAllByUsuarioIdAndAtivoTrue(usuario.getId());
+        return produtoRepository.findAllByUsuarioId(usuario.getId());
     }
 
     public Produto buscarPorId(Integer id) {
