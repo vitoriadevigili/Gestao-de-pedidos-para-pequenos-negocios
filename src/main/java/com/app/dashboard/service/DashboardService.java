@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +56,18 @@ public class DashboardService {
         long clientesAtivos = contarClientesDistintos(pedidosAtual);
         long clientesAtivosAnterior = contarClientesDistintos(pedidosAnterior);
 
+        BigDecimal ticketMedioAtual = calcularTicketMedio(faturamentoAtual, pedidosPeriodo);
+        BigDecimal ticketMedioAnterior = calcularTicketMedio(faturamentoAnterior, pedidosAnteriorQtd);
+
         return new CardsResumoResponse(
                 faturamentoAtual,
                 calcularCrescimentoPercentual(faturamentoAtual, faturamentoAnterior),
                 pedidosPeriodo,
                 calcularCrescimentoPercentual(BigDecimal.valueOf(pedidosPeriodo), BigDecimal.valueOf(pedidosAnteriorQtd)),
                 clientesAtivos,
-                clientesAtivos - clientesAtivosAnterior
+                clientesAtivos - clientesAtivosAnterior,
+                ticketMedioAtual,
+                calcularCrescimentoPercentual(ticketMedioAtual, ticketMedioAnterior)
         );
     }
 
@@ -81,9 +87,31 @@ public class DashboardService {
             agrupado.merge(chave, pedido.getValorTotal(), BigDecimal::add);
         }
 
-        return agrupado.entrySet().stream()
-                .map(entry -> new PontoEvolucaoResponse(entry.getKey(), entry.getValue()))
+        return gerarChavesPeriodo(periodo[0], periodo[1], agruparPorMes).stream()
+                .map(data -> data.format(formato))
+                .map(chave -> new PontoEvolucaoResponse(chave, agrupado.getOrDefault(chave, BigDecimal.ZERO)))
                 .toList();
+    }
+
+    private List<LocalDate> gerarChavesPeriodo(LocalDate inicio, LocalDate fim, boolean agruparPorMes) {
+        List<LocalDate> chaves = new ArrayList<>();
+
+        if (agruparPorMes) {
+            LocalDate cursor = inicio.with(TemporalAdjusters.firstDayOfMonth());
+            LocalDate limite = fim.with(TemporalAdjusters.firstDayOfMonth());
+            while (!cursor.isAfter(limite)) {
+                chaves.add(cursor);
+                cursor = cursor.plusMonths(1);
+            }
+        } else {
+            LocalDate cursor = inicio;
+            while (!cursor.isAfter(fim)) {
+                chaves.add(cursor);
+                cursor = cursor.plusDays(1);
+            }
+        }
+
+        return chaves;
     }
 
     public List<UltimoPedidoResponse> buscarUltimosPedidos(LocalDate dataInicial, LocalDate dataFinal, Integer clienteId) {
@@ -124,6 +152,13 @@ public class DashboardService {
         return pedidos.stream()
                 .map(Pedido::getValorTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calcularTicketMedio(BigDecimal faturamento, long quantidadePedidos) {
+        if (quantidadePedidos == 0) {
+            return BigDecimal.ZERO;
+        }
+        return faturamento.divide(BigDecimal.valueOf(quantidadePedidos), 2, RoundingMode.HALF_UP);
     }
 
     private long contarClientesDistintos(List<Pedido> pedidos) {

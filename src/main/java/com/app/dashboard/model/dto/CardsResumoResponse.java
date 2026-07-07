@@ -8,6 +8,8 @@ public record CardsResumoResponse(
         Long pedidosPeriodo,
         Double crescimentoPedidos,
         Long clientesAtivos,
-        Long crescimentoClientesAtivos
+        Long crescimentoClientesAtivos,
+        BigDecimal ticketMedio,
+        Double crescimentoTicketMedio
 ) {
 }
