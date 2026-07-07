@@ -111,8 +111,8 @@ public class PedidoService {
     @Transactional
     public void deletar(Integer id) {
         Pedido pedido = encontrarPedido(id);
-        pedido.setAtivo(false);
-        pedidoRepository.save(pedido);
+        produtoPedidoRepository.deleteAllByPedidoId(pedido.getId());
+        pedidoRepository.delete(pedido);
     }
 
     public List<ProdutoPedido> listarItens(Integer pedidoId) {
