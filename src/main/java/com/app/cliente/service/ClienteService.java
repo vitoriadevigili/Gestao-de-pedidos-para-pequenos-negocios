@@ -35,7 +35,7 @@ public class ClienteService {
 
     public List<Cliente> listarTodos() {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
-        return clienteRepository.findAllByUsuarioId(usuario.getId());
+        return clienteRepository.findAllByUsuarioIdAndDeletadoIsFalse(usuario.getId());
     }
 
     public Cliente buscarPorId(Integer id) {
