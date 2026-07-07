@@ -1,6 +1,7 @@
 package com.app.produto.service;
 
 import com.app.auth.security.UsuarioAutenticadoProvider;
+import com.app.pedido.repository.ProdutoPedidoRepository;
 import com.app.produto.model.dto.AtualizarProdutoRequest;
 import com.app.produto.model.dto.CriarProdutoRequest;
 import com.app.produto.model.entity.Produto;
@@ -17,13 +18,16 @@ import java.util.List;
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
+    private final ProdutoPedidoRepository produtoPedidoRepository;
     private final UsuarioAutenticadoProvider usuarioAutenticadoProvider;
 
     public ProdutoService(
             ProdutoRepository produtoRepository,
+            ProdutoPedidoRepository produtoPedidoRepository,
             UsuarioAutenticadoProvider usuarioAutenticadoProvider
     ) {
         this.produtoRepository = produtoRepository;
+        this.produtoPedidoRepository = produtoPedidoRepository;
         this.usuarioAutenticadoProvider = usuarioAutenticadoProvider;
     }
 
@@ -62,8 +66,12 @@ public class ProdutoService {
     @Transactional
     public void deletar(Integer id) {
         Produto produto = encontrarProduto(id);
-        produto.setAtivo(false);
-        produtoRepository.save(produto);
+
+        if (produtoPedidoRepository.existsByProdutoId(produto.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Produto vinculado a um pedido não pode ser deletado");
+        }
+
+        produtoRepository.delete(produto);
     }
 
     private Produto encontrarProduto(Integer id) {
