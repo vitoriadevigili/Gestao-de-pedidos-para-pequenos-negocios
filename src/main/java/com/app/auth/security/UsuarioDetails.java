@@ -20,6 +20,10 @@ public class UsuarioDetails implements UserDetails {
         return usuario;
     }
 
+    public Integer getId() {
+        return usuario.getId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
