@@ -93,7 +93,7 @@ public class ClienteService {
     @Transactional
     public void deletar(Integer id) {
         Cliente cliente = encontrarCliente(id);
-        cliente.setAtivo(false);
+        cliente.setDeletado(true);
         clienteRepository.save(cliente);
     }
 
