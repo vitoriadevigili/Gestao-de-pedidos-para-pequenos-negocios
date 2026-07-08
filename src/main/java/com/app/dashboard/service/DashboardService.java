@@ -56,18 +56,13 @@ public class DashboardService {
         long clientesAtivos = contarClientesDistintos(pedidosAtual);
         long clientesAtivosAnterior = contarClientesDistintos(pedidosAnterior);
 
-        BigDecimal ticketMedioAtual = calcularTicketMedio(faturamentoAtual, pedidosPeriodo);
-        BigDecimal ticketMedioAnterior = calcularTicketMedio(faturamentoAnterior, pedidosAnteriorQtd);
-
         return new CardsResumoResponse(
                 faturamentoAtual,
                 calcularCrescimentoPercentual(faturamentoAtual, faturamentoAnterior),
                 pedidosPeriodo,
                 calcularCrescimentoPercentual(BigDecimal.valueOf(pedidosPeriodo), BigDecimal.valueOf(pedidosAnteriorQtd)),
                 clientesAtivos,
-                clientesAtivos - clientesAtivosAnterior,
-                ticketMedioAtual,
-                calcularCrescimentoPercentual(ticketMedioAtual, ticketMedioAnterior)
+                clientesAtivos - clientesAtivosAnterior
         );
     }
 
@@ -152,13 +147,6 @@ public class DashboardService {
         return pedidos.stream()
                 .map(Pedido::getValorTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private BigDecimal calcularTicketMedio(BigDecimal faturamento, long quantidadePedidos) {
-        if (quantidadePedidos == 0) {
-            return BigDecimal.ZERO;
-        }
-        return faturamento.divide(BigDecimal.valueOf(quantidadePedidos), 2, RoundingMode.HALF_UP);
     }
 
     private long contarClientesDistintos(List<Pedido> pedidos) {

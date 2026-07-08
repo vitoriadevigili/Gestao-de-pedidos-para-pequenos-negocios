@@ -31,15 +31,17 @@ public class FormatadorUtils {
     }
 
     /**
-     * Remove toda a formatação de um CNPJ.
+     * Remove toda a formatação de um CNPJ, preservando letras do novo formato
+     * alfanumérico da Receita Federal.
      * Ex.: 12.345.678/0001-90 -> 12345678000190
+     * Ex.: 12.ABC.345/01DE-35 -> 12ABC34501DE35
      */
     public static String removerFormatacaoCnpj(String cnpj) {
         if (cnpj == null || cnpj.isBlank()) {
             return null;
         }
 
-        return cnpj.replaceAll("\\D", "");
+        return cnpj.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
     }
 
 }
