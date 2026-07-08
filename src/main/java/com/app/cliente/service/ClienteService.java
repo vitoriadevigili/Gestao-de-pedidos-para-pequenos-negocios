@@ -103,4 +103,8 @@ public class ClienteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 
+    public List<Cliente> listarTodosClientesAtivos() {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return clienteRepository.findAllByUsuarioIdAndAtivoIsTrue(usuario.getId());
+    }
 }
