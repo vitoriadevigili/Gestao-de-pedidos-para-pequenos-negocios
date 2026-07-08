@@ -3,9 +3,12 @@ package com.app.dashboard.service;
 import com.app.auth.security.UsuarioAutenticadoProvider;
 import com.app.dashboard.model.dto.CardsResumoResponse;
 import com.app.dashboard.model.dto.PontoEvolucaoResponse;
+import com.app.dashboard.model.dto.ProdutoMaisVendidoResponse;
 import com.app.dashboard.model.dto.UltimoPedidoResponse;
 import com.app.pedido.model.entity.Pedido;
+import com.app.pedido.model.entity.ProdutoPedido;
 import com.app.pedido.repository.PedidoRepository;
+import com.app.pedido.repository.ProdutoPedidoRepository;
 import com.app.pedido.specification.PedidoSpecification;
 import com.app.usuario.model.entity.Usuario;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,14 +30,21 @@ import java.util.TreeMap;
 public class DashboardService {
 
     private static final int LIMITE_ULTIMOS_PEDIDOS = 10;
+    private static final int LIMITE_TOP_PRODUTOS = 3;
     private static final DateTimeFormatter FORMATO_MES = DateTimeFormatter.ofPattern("yyyy-MM");
     private static final DateTimeFormatter FORMATO_DIA = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final PedidoRepository pedidoRepository;
+    private final ProdutoPedidoRepository produtoPedidoRepository;
     private final UsuarioAutenticadoProvider usuarioAutenticadoProvider;
 
-    public DashboardService(PedidoRepository pedidoRepository, UsuarioAutenticadoProvider usuarioAutenticadoProvider) {
+    public DashboardService(
+            PedidoRepository pedidoRepository,
+            ProdutoPedidoRepository produtoPedidoRepository,
+            UsuarioAutenticadoProvider usuarioAutenticadoProvider
+    ) {
         this.pedidoRepository = pedidoRepository;
+        this.produtoPedidoRepository = produtoPedidoRepository;
         this.usuarioAutenticadoProvider = usuarioAutenticadoProvider;
     }
 
@@ -125,6 +136,27 @@ public class DashboardService {
                         pedido.getData(),
                         pedido.getValorTotal()
                 ))
+                .toList();
+    }
+
+    public List<ProdutoMaisVendidoResponse> buscarTopProdutos(LocalDate dataInicial, LocalDate dataFinal, Integer clienteId) {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        LocalDate[] periodo = resolverPeriodo(dataInicial, dataFinal);
+
+        List<Pedido> pedidos = pedidoRepository.findAll(
+                PedidoSpecification.comFiltros(usuario.getId(), periodo[0], periodo[1], clienteId));
+
+        Map<String, Long> quantidadePorProduto = new LinkedHashMap<>();
+        for (Pedido pedido : pedidos) {
+            for (ProdutoPedido item : produtoPedidoRepository.findAllByPedidoId(pedido.getId())) {
+                quantidadePorProduto.merge(item.getProduto().getNome(), (long) item.getQuantidade(), Long::sum);
+            }
+        }
+
+        return quantidadePorProduto.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(LIMITE_TOP_PRODUTOS)
+                .map(entry -> new ProdutoMaisVendidoResponse(entry.getKey(), entry.getValue()))
                 .toList();
     }
 

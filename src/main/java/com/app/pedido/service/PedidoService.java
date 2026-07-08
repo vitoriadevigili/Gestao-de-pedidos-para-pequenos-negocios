@@ -57,7 +57,7 @@ public class PedidoService {
     public Pedido salvar(CriarPedidoRequest request) {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
 
-        Cliente cliente = clienteRepository.findByUsuarioIdAndIdAndDeletadoIsFalse(usuario.getId(), request.clienteId())
+        Cliente cliente = clienteRepository.findByUsuarioIdAndId(usuario.getId(), request.clienteId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
 
         if (cliente.estaInativo())
