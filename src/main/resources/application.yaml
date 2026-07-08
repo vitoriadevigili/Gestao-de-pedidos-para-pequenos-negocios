@@ -3,9 +3,9 @@ spring:
     name: Gestão pedidos
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: sql123
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -15,12 +15,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: gestao_pedidos
 
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
 
 server:
+  port: 8089
   error:
     include-message: always
     include-binding-errors: always
