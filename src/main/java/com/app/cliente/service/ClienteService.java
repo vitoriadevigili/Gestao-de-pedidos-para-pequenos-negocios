@@ -93,6 +93,11 @@ public class ClienteService {
     @Transactional
     public void deletar(Integer id) {
         Cliente cliente = encontrarCliente(id);
+
+        if (clienteRepository.existsClienteById(cliente.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cliente vinculado a um pedido não pode ser deletado");
+        }
+
         cliente.setDeletado(true);
         clienteRepository.save(cliente);
     }
@@ -103,4 +108,8 @@ public class ClienteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 
+    public List<Cliente> listarTodosClientesAtivos() {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return clienteRepository.findAllByUsuarioIdAndAtivoIsTrue(usuario.getId());
+    }
 }

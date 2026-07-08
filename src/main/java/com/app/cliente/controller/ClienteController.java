@@ -31,6 +31,13 @@ public class ClienteController {
         return ResponseEntity.ok(clienteResponseList);
     }
 
+    @GetMapping("/ativos")
+    public ResponseEntity<List<ClienteResponse>> listarTodosClientesAtivos() {
+        List<Cliente> clienteList = clienteService.listarTodosClientesAtivos();
+        List<ClienteResponse> clienteResponseList = clienteList.stream().map(this::toResponse).toList();
+        return ResponseEntity.ok(clienteResponseList);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable Integer id) {
         Cliente cliente = clienteService.buscarPorId(id);
