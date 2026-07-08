@@ -12,4 +12,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer>, JpaSpe
     List<Pedido> findAllByUsuarioId(Integer usuarioId);
 
     Optional<Pedido> findByUsuarioIdAndId(Integer usuarioId, Integer id);
+
+    boolean existsByClienteId(Integer clienteId);
 }

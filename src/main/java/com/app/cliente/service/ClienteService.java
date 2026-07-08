@@ -7,6 +7,7 @@ import com.app.cliente.model.entity.Cliente;
 import com.app.cliente.model.entity.Endereco;
 import com.app.cliente.repository.ClienteRepository;
 import com.app.cliente.repository.EnderecoRepository;
+import com.app.pedido.repository.PedidoRepository;
 import com.app.usuario.model.entity.Usuario;
 import com.app.util.FormatadorUtils;
 import org.springframework.http.HttpStatus;
@@ -21,21 +22,24 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final EnderecoRepository enderecoRepository;
+    private final PedidoRepository pedidoRepository;
     private final UsuarioAutenticadoProvider usuarioAutenticadoProvider;
 
     public ClienteService(
             ClienteRepository clienteRepository,
             EnderecoRepository enderecoRepository,
+            PedidoRepository pedidoRepository,
             UsuarioAutenticadoProvider usuarioAutenticadoProvider
     ) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
+        this.pedidoRepository = pedidoRepository;
         this.usuarioAutenticadoProvider = usuarioAutenticadoProvider;
     }
 
     public List<Cliente> listarTodos() {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
-        return clienteRepository.findAllByUsuarioIdAndDeletadoIsFalse(usuario.getId());
+        return clienteRepository.findAllByUsuarioId(usuario.getId());
     }
 
     public Cliente buscarPorId(Integer id) {
@@ -94,17 +98,18 @@ public class ClienteService {
     public void deletar(Integer id) {
         Cliente cliente = encontrarCliente(id);
 
-        if (clienteRepository.existsClienteById(cliente.getId())) {
+        if (pedidoRepository.existsByClienteId(cliente.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cliente vinculado a um pedido não pode ser deletado");
         }
 
-        cliente.setDeletado(true);
-        clienteRepository.save(cliente);
+        Endereco endereco = cliente.getEndereco();
+        clienteRepository.delete(cliente);
+        enderecoRepository.delete(endereco);
     }
 
     private Cliente encontrarCliente(Integer id) {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
-        return clienteRepository.findByUsuarioIdAndIdAndDeletadoIsFalse(usuario.getId(), id)
+        return clienteRepository.findByUsuarioIdAndId(usuario.getId(), id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 

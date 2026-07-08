@@ -2,6 +2,7 @@ package com.app.dashboard.controller;
 
 import com.app.dashboard.model.dto.CardsResumoResponse;
 import com.app.dashboard.model.dto.PontoEvolucaoResponse;
+import com.app.dashboard.model.dto.ProdutoMaisVendidoResponse;
 import com.app.dashboard.model.dto.UltimoPedidoResponse;
 import com.app.dashboard.service.DashboardService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -49,5 +50,14 @@ public class DashboardController {
             @RequestParam(required = false) Integer clienteId
     ) {
         return ResponseEntity.ok(dashboardService.buscarUltimosPedidos(dataInicial, dataFinal, clienteId));
+    }
+
+    @GetMapping("/top-produtos")
+    public ResponseEntity<List<ProdutoMaisVendidoResponse>> buscarTopProdutos(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal,
+            @RequestParam(required = false) Integer clienteId
+    ) {
+        return ResponseEntity.ok(dashboardService.buscarTopProdutos(dataInicial, dataFinal, clienteId));
     }
 }
