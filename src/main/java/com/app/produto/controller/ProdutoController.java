@@ -29,6 +29,13 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoResponseList);
     }
 
+    @GetMapping("/ativos")
+    public ResponseEntity<List<ProdutoResponse>> listarTodosProdutosAtivos() {
+        List<Produto> produtoList = produtoService.listarTodosProdutosAtivos();
+        List<ProdutoResponse> produtoResponseList = produtoList.stream().map(this::toResponse).toList();
+        return ResponseEntity.ok(produtoResponseList);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoResponse> buscarPorId(@PathVariable Integer id) {
         Produto produto = produtoService.buscarPorId(id);

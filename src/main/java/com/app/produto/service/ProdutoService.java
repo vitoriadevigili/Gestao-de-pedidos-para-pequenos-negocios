@@ -80,4 +80,8 @@ public class ProdutoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
     }
 
+    public List<Produto> listarTodosProdutosAtivos() {
+        Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
+        return produtoRepository.findAllByUsuarioIdAndAtivoIsTrue(usuario.getId());
+    }
 }
