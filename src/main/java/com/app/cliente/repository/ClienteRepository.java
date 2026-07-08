@@ -14,4 +14,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
     Optional<Cliente> findByUsuarioIdAndIdAndDeletadoIsFalse(Integer usuarioId, Integer id);
 
     List<Cliente> findAllByUsuarioIdAndAtivoIsTrue(Integer usuarioId);
+
+    boolean existsClienteById(Integer clienteId);
 }
