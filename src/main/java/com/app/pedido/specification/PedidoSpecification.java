@@ -20,7 +20,6 @@ public class PedidoSpecification {
             var predicado = builder.conjunction();
 
             predicado = builder.and(predicado, builder.equal(root.get("usuario").get("id"), usuarioId));
-            predicado = builder.and(predicado, builder.isTrue(root.get("ativo")));
 
             if (dataInicial != null && dataFinal != null) {
                 predicado = builder.and(predicado, builder.between(root.get("data"), dataInicial, dataFinal));

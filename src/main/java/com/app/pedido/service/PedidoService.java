@@ -46,7 +46,7 @@ public class PedidoService {
 
     public List<Pedido> listarTodos() {
         Usuario usuario = usuarioAutenticadoProvider.obterUsuarioAutenticado();
-        return pedidoRepository.findAllByUsuarioIdAndAtivoTrue(usuario.getId());
+        return pedidoRepository.findAllByUsuarioId(usuario.getId());
     }
 
     public Pedido buscarPorId(Integer id) {
@@ -98,7 +98,6 @@ public class PedidoService {
             BigDecimal valorTotal = calcularValorTotalPedido(produtoPedidoList);
             pedido.setValorTotal(valorTotal);
         }
-        if (request.ativo() != null) pedido.setAtivo(request.ativo());
         return pedidoRepository.save(pedido);
     }
 

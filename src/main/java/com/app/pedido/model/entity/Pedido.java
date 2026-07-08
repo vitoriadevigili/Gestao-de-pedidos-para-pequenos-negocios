@@ -27,9 +27,6 @@ public class Pedido {
     @Column(name = "valor_total", precision = 10, scale = 2)
     private BigDecimal valorTotal = BigDecimal.ZERO;
 
-    @Column
-    private Boolean ativo = true;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;

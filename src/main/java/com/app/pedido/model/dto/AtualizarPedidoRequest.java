@@ -7,8 +7,6 @@ import java.util.List;
 public record AtualizarPedidoRequest(
 
         @Valid
-        List<ItemPedidoRequest> itens,
-
-        Boolean ativo
+        List<ItemPedidoRequest> itens
 ) {
 }
