@@ -73,7 +73,6 @@ public class PedidoController {
                 pedido.getId(),
                 pedido.getData(),
                 pedido.getValorTotal(),
-                pedido.getAtivo(),
                 pedido.getCliente().getId(),
                 pedido.getCliente().getNome(),
                 itemResponseList

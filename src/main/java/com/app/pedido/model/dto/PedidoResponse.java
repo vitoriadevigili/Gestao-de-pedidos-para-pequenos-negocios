@@ -8,7 +8,6 @@ public record PedidoResponse(
         Integer id,
         LocalDate data,
         BigDecimal valorTotal,
-        Boolean ativo,
         Integer clienteId,
         String nomeCliente,
         List<ItemPedidoResponse> itens

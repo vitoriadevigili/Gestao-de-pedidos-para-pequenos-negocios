@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Integer>, JpaSpecificationExecutor<Pedido> {
 
-    List<Pedido> findAllByUsuarioIdAndAtivoTrue(Integer usuarioId);
+    List<Pedido> findAllByUsuarioId(Integer usuarioId);
 
     Optional<Pedido> findByUsuarioIdAndId(Integer usuarioId, Integer id);
 }
